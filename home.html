@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<h2>趣味小画板</h2>
+<canvas id="glCanvas" width="640" height="480"></canvas>
+</body>
+<script>
+    main();
+
+    function main() {
+        const canvas = document.querySelector('#glCanvas')
+        const gl = canvas.getContext("webgl")
+
+        if (gl === null) {
+            return;
+        }
+
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+        gl.clearDepth(1.0);                 // Clear everything
+        // Clear the canvas before we start drawing on it.
+
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Create a perspective matrix, a special matrix that is
+        // used to simulate the distortion of perspective in a camera.
+        // Our field of view is 45 degrees, with a width/height
+        // ratio that matches the display size of the canvas
+        // and we only want to see objects between 0.1 units
+        // and 100 units away from the camera.
+
+        // note: glmatrix.js always has the first argument
+        // as the destination to receive the result.
+
+    }
+
+
+    function initShaderProgram(gl, vsSource, fsSource) {
+        const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
+        const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+
+        // Create the shader program
+
+        const shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        // If creating the shader program failed, alert
+
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
+            return null;
+        }
+
+        return shaderProgram;
+    }
+</script>
+</html>
