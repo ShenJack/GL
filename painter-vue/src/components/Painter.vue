@@ -39,7 +39,7 @@
                     <FormItem label="背景色">
                         <div style="border:black 1px solid;display: inline-block;margin-right: 5px"
                              :style="{background:boardConfig.color,width:'50px',height:'20px'}"></div>
-                        <Button @click="showColorSelect(BACKGROUND_COLOR)" >选择颜色</Button>
+                        <Button @click="showColorSelect(BACKGROUND_COLOR)">选择颜色</Button>
                     </FormItem>
                     <FormItem label="尺">
                         <Button @click="addRuler" :disabled="ruler.enabled">添加</Button>
@@ -47,7 +47,8 @@
                 </Form>
             </div>
         </Drawer>
-        <div class="ruler" @mousedown="RulerMouseDown" @mousemove="RulerMouseMove" :style="{top:ruler.y + 'px',left:ruler.x + 'px'}"
+        <div class="ruler" @mousedown="RulerMouseDown" @mousemove="RulerMouseMove" @mousewheel="RulerMouseWheel"
+             :style="{top:ruler.y + 'px',left:ruler.x + 'px', transform: 'rotate(' + ruler.angle +  'deg)'}"
              @mouseup="RulerMouseUp">
         </div>
     </div>
@@ -67,17 +68,17 @@
         },
         data() {
             return {
-                ruler:{
-                    enabled:false,
-                    x:100,
-                    y:10,
-                    angle:0,
+                ruler: {
+                    enabled: false,
+                    x: 100,
+                    y: 10,
+                    angle: 0,
                 },
                 img: undefined,
                 patternAvailable: false,
                 value1: true,
                 width: 1920,
-                height: 680,
+                height: 800,
 
                 PAINT_COLOR: "paint_color",
                 BACKGROUND_COLOR: "board_color",
@@ -156,7 +157,7 @@
 //                paint.closePath();
 //                paint.fill();
 //                paint.drawImage(this.img, x - width / 2, y - width / 2, width, width)
-                this.circleImg(paint,this.img,x,y,width);
+                this.circleImg(paint, this.img, x, y, width);
             },
             mouseDown(event) {
                 this.down = true;
@@ -168,15 +169,25 @@
                     paint.arc(this.startX, this.startY, paint.lineWidth, 0, 2 * Math.PI)
                     paint.closePath();
                     paint.fill();
-                } else if(this.pen === this.STRING_PENCIL) {
+                } else if (this.pen === this.STRING_PENCIL) {
                     this.pencilDown(event);
-                } else{
+                } else {
                     let paint = this.getPaint();
                     let width = this.paintConfig.width;
-                    paint.fillRect(this.startX,this.startY - width/2,width/4,width)
+                    paint.fillRect(this.startX, this.startY - width / 2, width / 4, width)
                 }
             },
             mouseMove(event) {
+                if (this.rulerDragging) {
+                    let currentX = event.clientX - canvasLeft;
+                    let currentY = event.clientY - canvasTop;
+                    this.ruler.x += currentX - this.rulerStartX;
+                    this.ruler.y += currentY - this.rulerStartY;
+
+                    this.rulerStartX = currentX
+                    this.rulerStartY = currentY
+                    return
+                }
                 if (this.down) {
                     let currentX = event.clientX - canvasLeft;
                     let currentY = event.clientY - canvasTop;
@@ -192,7 +203,7 @@
                             paint.moveTo(this.startX, this.startY);
                             paint.beginPath();
 
-                            let rate = width/ Math.sqrt(Math.pow(currentX - this.startX, 2) + Math.pow(currentY - this.startY, 2))
+                            let rate = width / Math.sqrt(Math.pow(currentX - this.startX, 2) + Math.pow(currentY - this.startY, 2))
                             if ((currentX - this.startX) * (currentY - this.startY) > 0) {
                                 //同号 向右下或左上
                                 paint.lineTo(this.startX - Math.abs(currentY - this.startY) * rate, this.startY + Math.abs(currentX - this.startX) * rate);
@@ -221,17 +232,17 @@
                             paint.fill();
                             break;
                         case this.STRING_PENCIL:
-                            this.circleImg(paint,this.img,currentX,currentY,width);
+                            this.circleImg(paint, this.img, currentX, currentY, width);
                             break;
                         case this.STRING_HIGHLIGHTER:
                             paint.lineWidth = width;
-                            paint.fillRect(this.startX,this.startY - width/2,width/4,width);
+                            paint.fillRect(this.startX, this.startY - width / 2, width / 4, width);
                             paint.moveTo(this.startX, this.startY);
-                            if(Math.abs(currentX - this.startX)>width/4){
+                            if (Math.abs(currentX - this.startX) > width / 4) {
                                 paint.lineTo(currentX, currentY);
                                 paint.stroke();
                             }
-                            paint.fillRect(currentX,currentY - width/2,width/4,width);
+                            paint.fillRect(currentX, currentY - width / 2, width / 4, width);
 
                     }
 
@@ -294,23 +305,36 @@
                         this.boardConfig.waitColor = true;
                 }
             },
-            addRuler(){
+            addRuler() {
                 this.ruler.enabled = true
             },
-            RulerMouseDown(event){
+            RulerMouseDown(event) {
                 this.rulerStartX = event.clientX - canvasLeft;
                 this.rulerStartY = event.clientY - canvasTop;
                 this.rulerDragging = true;
 
             },
-            RulerMouseMove(event){
-                if(this.rulerDragging){
+            RulerMouseMove(event) {
+                // 当画笔到了尺子上
+                if(this.down){
+                    this.down = false
+                }
+                if (this.rulerDragging) {
                     let currentX = event.clientX - canvasLeft;
                     let currentY = event.clientY - canvasTop;
+                    this.ruler.x += currentX - this.rulerStartX;
+                    this.ruler.y += currentY - this.rulerStartY;
+
+                    this.rulerStartX = currentX
+                    this.rulerStartY = currentY
+
                 }
             },
-            RulerMouseUp(event){
+            RulerMouseUp(event) {
                 this.rulerDragging = false;
+            },
+            RulerMouseWheel(event){
+                this.ruler.angle += event.wheelDelta/120;
             },
         },
         mounted() {
@@ -344,15 +368,14 @@
         top: 0;
     }
 
-    .ruler{
+    .ruler {
         cursor: move;
         position: fixed;
         z-index: 1000;
         width: 120px;
         height: 700px;
         text-align: center;
-        background: #66666678;
-        transform: rotate(352deg);
-        border: #909090 4px solid;
+        background: rgba(75, 75, 75, 0.47);
+        border: #7a7a7a 4px solid;
     }
 </style>
