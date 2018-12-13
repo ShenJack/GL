@@ -5,7 +5,7 @@
                 <canvas id="glCanvas" :width="width" :height="height" @mousedown="mouseDown" @mousemove="mouseMove"
                         @drop="handleFileSelect"
                         @mouseup="mouseUp" @dragover="handleDragOver"></canvas>
-                <canvas id="cover" :width="width" :height="height"></canvas>
+                <!--<canvas id="cover" :width="width" :height="height"></canvas>-->
             </div>
             <Divider style="height: 100%" type="vertical"></Divider>
             <div style="width: 350px">
@@ -45,14 +45,14 @@
                             <Button @click="addRuler" :disabled="ruler.enabled">添加</Button>
                             <Button @click="clearRuler" :disabled="!ruler.enabled">移除</Button>
                         </FormItem>
-                        <FormItem label="图形">
-                            <RadioGroup @on-change="onShape" v-model="shape" type="button" size="large">
-                                <Radio :label="STRING_LINE">直线</Radio>
-                                <Radio :label="STRING_CIRCLE">圆</Radio>
-                                <Radio :label="STRING_SQUARE">方形</Radio>
-                                <Radio :label="STRING_ZHENG">正方形</Radio>
-                            </RadioGroup>
-                        </FormItem>
+                        <!--<FormItem label="图形">-->
+                            <!--<RadioGroup @on-change="onShape" v-model="shape" type="button" size="large">-->
+                                <!--<Radio :label="STRING_LINE">直线</Radio>-->
+                                <!--<Radio :label="STRING_CIRCLE">圆</Radio>-->
+                                <!--<Radio :label="STRING_SQUARE">方形</Radio>-->
+                                <!--<Radio :label="STRING_ZHENG">正方形</Radio>-->
+                            <!--</RadioGroup>-->
+                        <!--</FormItem>-->
                         <FormItem label="控制">
                             <Button @click="cancel">撤销</Button>
                         </FormItem>
